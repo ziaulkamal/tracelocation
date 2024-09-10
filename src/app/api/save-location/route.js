@@ -22,7 +22,7 @@ export async function POST(request) {
       .insert([{ ip_address, latitude, longitude, google_maps_url, device_info }]);
 
     if (error) {
-      return new Response(JSON.stringify({ status: 'error', message: error.message }), { 
+      return new Response(JSON.stringify({ status: 'error', message: error.message }), {
         status: 500,
         headers: {
           'Access-Control-Allow-Origin': '*',
@@ -33,7 +33,7 @@ export async function POST(request) {
       });
     }
 
-    return new Response(JSON.stringify({ status: 'success', message: 'Location and device info saved' }), { 
+    return new Response(JSON.stringify({ status: 'success', message: 'Location and device info saved' }), {
       status: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
@@ -43,7 +43,7 @@ export async function POST(request) {
       },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ status: 'error', message: error.message }), { 
+    return new Response(JSON.stringify({ status: 'error', message: error.message }), {
       status: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',
