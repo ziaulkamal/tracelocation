@@ -8,22 +8,24 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request) {
   try {
-    const { latitude, longitude, accuracy, device_info } = await request.json();
+    const { latitude, longitude, device_info } = await request.json();
 
     // Mendapatkan alamat IP dari request
-    // Catatan: Dalam lingkungan produksi, kamu perlu memastikan bahwa alamat IP yang diterima adalah dari pengguna yang sebenarnya
     const ip_address = request.headers.get('x-forwarded-for') || 'unknown';
+
+    // Membuat URL Google Maps
+    const google_maps_url = `https://www.google.com/maps/@${latitude},${longitude},21z`;
 
     // Simpan data ke Supabase
     const { data, error } = await supabase
-      .from('device_data')
-      .insert([{ ip_address, latitude, longitude, device_info }]);
+      .from('clients_visit')
+      .insert([{ ip_address, latitude, longitude, google_maps_url, device_info }]);
 
     if (error) {
       return new Response(JSON.stringify({ status: 'error', message: error.message }), { status: 500 });
     }
 
-    return new Response(JSON.stringify({ status: 'success', message: 'Location saved' }), { status: 200 });
+    return new Response(JSON.stringify({ status: 'success', message: 'Location and device info saved' }), { status: 200 });
   } catch (error) {
     return new Response(JSON.stringify({ status: 'error', message: error.message }), { status: 500 });
   }

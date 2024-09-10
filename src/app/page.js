@@ -11,9 +11,11 @@ export default function Home() {
       navigator.geolocation.getCurrentPosition((position) => {
         const { latitude, longitude, accuracy } = position.coords;
         setLocation({ latitude, longitude, accuracy });
-        
-        // Kirim data ke API
+
+        // Ambil informasi perangkat
         const userAgent = navigator.userAgent;
+
+        // Kirim data ke API
         fetch('/api/save-location', {
           method: 'POST',
           headers: {
