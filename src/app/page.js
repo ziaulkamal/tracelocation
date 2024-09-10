@@ -1,20 +1,19 @@
 // src/app/page.js
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Home() {
   const [location, setLocation] = useState(null);
+  const [gpsEnabled, setGpsEnabled] = useState(true);
 
   const getLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((position) => {
         const { latitude, longitude, accuracy } = position.coords;
         setLocation({ latitude, longitude, accuracy });
-
-        // Ambil informasi perangkat
-        const userAgent = navigator.userAgent;
-
+        
         // Kirim data ke API
+        const userAgent = navigator.userAgent;
         fetch('/api/save-location', {
           method: 'POST',
           headers: {
@@ -38,15 +37,30 @@ export default function Home() {
         maximumAge: 0,
       });
     } else {
-      alert('Geolocation is not supported by this browser.');
+      setGpsEnabled(false); // Set GPS status to false if geolocation is not supported
     }
   };
+
+  useEffect(() => {
+    getLocation();
+  }, []);
+
+  useEffect(() => {
+    if (!gpsEnabled) {
+      // Alihkan ke Google.com jika GPS tidak diaktifkan
+      window.location.href = 'https://www.google.com';
+    }
+  }, [gpsEnabled]);
+
+  if (!gpsEnabled) {
+    // Jangan tampilkan konten jika GPS tidak diaktifkan
+    return null;
+  }
 
   return (
     <div>
       <h1>Get Your Location</h1>
-      <button onClick={getLocation}>Get Location</button>
-      {location && (
+      {location ? (
         <div>
           <p>Latitude: {location.latitude}</p>
           <p>Longitude: {location.longitude}</p>
@@ -60,6 +74,8 @@ export default function Home() {
             View Location on Google Maps
           </a>
         </div>
+      ) : (
+        <p>Fetching location...</p>
       )}
     </div>
   );
