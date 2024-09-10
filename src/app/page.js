@@ -51,6 +51,14 @@ export default function Home() {
           <p>Latitude: {location.latitude}</p>
           <p>Longitude: {location.longitude}</p>
           <p>Accuracy: {location.accuracy} meters</p>
+          {/* Google Maps Link */}
+          <a 
+            href={`https://www.google.com/maps/@${location.latitude},${location.longitude},21z`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            View Location on Google Maps
+          </a>
         </div>
       )}
     </div>
