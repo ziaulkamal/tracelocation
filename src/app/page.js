@@ -1,4 +1,3 @@
-// src/app/page.js
 "use client";
 import React, { useState, useEffect } from 'react';
 
@@ -12,27 +11,39 @@ export default function Home() {
         const { latitude, longitude, accuracy } = position.coords;
         setLocation({ latitude, longitude, accuracy });
 
+        // Simpan data lokasi ke localStorage
+        const locationData = { latitude, longitude, accuracy };
+        localStorage.setItem('locationData', JSON.stringify(locationData));
+
         // Ambil informasi perangkat
         const userAgent = navigator.userAgent;
 
-        // Kirim data ke API
-        fetch('/api/save-location', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            latitude,
-            longitude,
-            accuracy,
-            device_info: userAgent
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => console.log(data))
-          .catch((error) => console.error('Error:', error));
+        // Kirim data ke API jika belum dikirim sebelumnya
+        const locationSent = localStorage.getItem('locationSent');
+        if (!locationSent) {
+          fetch('/api/save-location', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              latitude,
+              longitude,
+              accuracy,
+              device_info: userAgent
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log(data);
+              // Tandai bahwa lokasi sudah dikirim
+              localStorage.setItem('locationSent', 'true');
+            })
+            .catch((error) => console.error('Error:', error));
+        }
       }, (error) => {
         console.error('Error Code = ' + error.code + ' - ' + error.message);
+        setGpsEnabled(false);
       }, {
         enableHighAccuracy: true,
         timeout: 10000,
@@ -44,7 +55,13 @@ export default function Home() {
   };
 
   useEffect(() => {
-    getLocation();
+    // Cek apakah lokasi sudah tersedia di localStorage
+    const storedLocation = localStorage.getItem('locationData');
+    if (storedLocation) {
+      setLocation(JSON.parse(storedLocation));
+    } else {
+      getLocation();
+    }
   }, []);
 
   useEffect(() => {
