@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Inisialisasi Telegram Bot
 const telegramBotToken = '7228539103:AAGMrGW6HA41aKYycNXFo8tCqQp_Z7xjrSA';
-const telegramChatId = '-1002236749350_1'; // ID chat atau grup di Telegram
+const telegramChatId = '-1002236749350_135'; // ID chat atau grup di Telegram
 const telegramApiUrl = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
 
 async function sendToTelegram(message) {
